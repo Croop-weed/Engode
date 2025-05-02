@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create Algorithm</title>
+    <style>.tag-box {
+        position: relative;
+        width: 18rem;
+        height: 2.5rem;
+        border-radius: 50px;
+        background: linear-gradient(to right, #656565, #7f427f, #600c56, #5300a0, #757757, #656565);
+        background-size: 200%;
+        animation: animationGradient 2.5s linear infinite;
+        box-shadow: 0 0 15px white;
+    }
+    
+    @keyframes animationGradient {
+        to {
+            background-position: 200%;
+        }
+    }
+    
+    .tag-box .tag {
+        position: absolute;
+        inset: 1.5px;
+        font-size: large;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: black;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.5s ease;
+        cursor: pointer;
+        padding: 18px; /* Moved here from the separate .tag rule */
+    }
+    
+    .tag-box .tag:hover {
+        color: #5300a0;
+    }
+    .tag-box {
+        margin: 0 auto;
+    }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+</head>
+<body>
+    
+    
+<section class="section is-flex is-justify-content-center is-align-items-center" style="height: 100vh;">    
+    <form id="algoForm" class="box" style="align-self: center;">
+        <br><br>
+        <div class="tag-box">
+            <div class="tag">Create a New Algorithm &wedbar;</div>   
+        </div>
+        <br><br>
+        <label class="label">Algorithm Name:</label>
+        <br>
+        <input  class="input is-medium" style="height: auto; width: auto;" type="text" id="algoName" required>
+        <button class="button is-medium is-primary" type="submit">Create Algorithm</button>
+        <br><br>
+        <h3>All Algorithm Tables:</h3>
+        <ul id="tableList" class="table is-striped is-hoverable is-fullwidth is-narrow"></ul>
+    </form>
+
+    
+
+</section>
+
+
+<script>
+    function fetchTables() {
+        fetch("http://localhost:8080/api/get-algorithm-tables")
+            .then(response => response.json())
+            .then(data => {
+                const tableList = document.getElementById("tableList");
+                tableList.innerHTML = "";
+                data.forEach(table => {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = table + " ";
+
+                    // Add a button to open the table details page
+                    let viewButton = document.createElement("button");
+                    viewButton.className="button is-black is-small";
+                    viewButton.textContent = "View";
+                    viewButton.onclick = function() {
+                        window.location.href = `algorithm.html?table=${encodeURIComponent(table)}`;
+                    };
+
+                    listItem.appendChild(viewButton);
+                    tableList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error("Error fetching tables:", error));
+    }
+
+    document.getElementById("algoForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const algoName = document.getElementById("algoName").value;
+
+        fetch("http://localhost:8080/api/create-algorithm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: algoName })
+        })
+            .then(response => response.json())
+            .then(() => {
+                location.reload(); // Refresh the page after creation
+            })
+            .catch(error => console.error("Error:", error));
+    });
+
+    // Load tables when the page opens
+    fetchTables();
+</script>
+</body>
+</html>

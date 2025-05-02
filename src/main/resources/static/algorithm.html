@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Algorithm Table</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+</head>
+<body>
+
+<h1 class="title is-1" style="text-align: center;"><span id="tableName"></span></h1>
+
+<table class="table is-striped table is-fullwidth">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Step Number</th>
+        <th>Description</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="stepsTable"></tbody>
+</table>
+
+<h3 class="title is-5">Add New Step</h3>
+<form id="addStepForm">
+    <label>Step Number:</label>
+    <br><br>
+    <input type="number" class="input is-link" id="stepNumber" required>
+    <br><br>
+    <label>Description:</label>
+    <br><br>
+    <input type="text" class="input is-link" id="description" required>
+    <br><br>
+    <button type="submit" class="button is-primary is-light is-small">Add Step</button>
+</form>
+
+<br><br>
+<h3 class="title is-5">Generate Code</h3>
+<button class="button is-danger" onclick="generateCode()">Generate</button>
+
+<br><br>
+<div class="skeleton-lines">
+    <pre id="codeOutput"></pre>
+</div>
+
+<script>
+    let tableName;
+
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        tableName = params.get("table");
+
+        if (tableName) {
+            document.getElementById("tableName").textContent = tableName;
+            fetchSteps();
+        } else {
+            document.getElementById("tableName").textContent = "No table selected.";
+        }
+    };
+
+    function fetchSteps() {
+        fetch(`http://localhost:8080/api/${tableName}/steps`)
+            .then(response => response.json())
+            .then(data => {
+                const stepsTable = document.getElementById("stepsTable");
+                stepsTable.innerHTML = "";
+                data.forEach(step => {
+                    let row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${step.id}</td>
+                        <td>${step.stepNumber}</td>
+                        <td>${step.description}</td>
+                        <td>
+                            <button class="button is-warning is-small" onclick="editStep(${step.id}, ${step.stepNumber}, '${step.description}')">Edit</button>
+                        </td>
+                    `;
+                    stepsTable.appendChild(row);
+                });
+            })
+            .catch(error => console.error("Error fetching steps:", error));
+    }
+
+    document.getElementById("addStepForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const stepNumber = document.getElementById("stepNumber").value;
+        const description = document.getElementById("description").value;
+
+        fetch(`http://localhost:8080/api/${tableName}/add-step`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stepNumber: parseInt(stepNumber), description })
+        })
+            .then(response => response.text())
+            .then(() => {
+                document.getElementById("stepNumber").value = "";
+                document.getElementById("description").value = "";
+                fetchSteps();
+            })
+            .catch(error => console.error("Error adding step:", error));
+    });
+
+    function editStep(id, stepNumber, description) {
+        const newStepNumber = prompt("Enter new step number:", stepNumber);
+        const newDescription = prompt("Enter new description:", description);
+
+        if (newStepNumber && newDescription) {
+            fetch(`http://localhost:8080/api/${tableName}/update-step`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: id,
+                    stepNumber: parseInt(newStepNumber),
+                    description: newDescription
+                })
+            })
+                .then(response => response.text())
+                .then(message => {
+                    console.log(message);
+                    fetchSteps();
+                })
+                .catch(error => console.error("Error updating step:", error));
+        }
+    }
+
+    function generateCode() {
+        const language = "Java"; // Hardcoded to Java only
+
+        fetch(`http://localhost:8080/api/${tableName.trim()}/generate-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ language: language })
+        })
+            .then(response => response.text())
+            .then(code => {
+                document.getElementById("codeOutput").textContent = code;
+            })
+            .catch(error => console.error("Error generating code:", error));
+    }
+</script>
+
+</body>
+</html>
