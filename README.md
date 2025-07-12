@@ -35,10 +35,10 @@
 
 ## 📸 Screenshots
 
-![Screenshots](screenshot/front-page.jpg)
-![Screenshots](screenshot/filepage.jpg)
-![Screenshots](screenshot/algorithm.jpg)
-![Screenshots](screenshot/output.jpg)
+![Screenshots](screenshots/front-page.jpg)
+![Screenshots](screenshots/filepage.jpg)
+![Screenshots](screenshots/algorithm.jpg)
+![Screenshots](screenshots/output.jpg)
 
 ---
 
