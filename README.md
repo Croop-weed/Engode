@@ -35,7 +35,10 @@
 
 ## 📸 Screenshots
 
-*(Add screenshots of your UI or API responses here)*
+![Screenshots](screenshot/front-page.jpg)
+![Screenshots](screenshot/filepage.jpg)
+![Screenshots](screenshot/algorithm.jpg)
+![Screenshots](screenshot/output.jpg)
 
 ---
 
